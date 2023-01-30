@@ -21,6 +21,14 @@ var pl = fmt.Println
 		return x + 1, strconv.Itoa(x);
 	}
 
+		func sumArray(arr []int) (int){
+		sum := 0
+		for _, value := range arr{
+			sum += value
+		}
+		return sum
+	}
+
 func main(){
 	var total = getSum(30, 40);
 	pl("The total sum is: ",total)
@@ -34,5 +42,9 @@ func main(){
 	for i, runeVal := range rStr {
 		fmt.Printf("%d : %#U : %c\n", i, runeVal, runeVal);
 	}
+
+	// Arrays
+	myArr := []int{1,2,3,4,5,6,7,8,9,10};
+	pl("Sum of array: ", sumArray(myArr));
 
 }
