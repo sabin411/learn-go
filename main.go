@@ -1,6 +1,7 @@
 package main
 
 import (
+	"go-gin/controllers"
 	"go-gin/initializers"
 
 	"github.com/gin-gonic/gin"
@@ -14,11 +15,10 @@ func init(){
 func main() {
 	r := gin.Default();
 
-	r.GET("/", func(ctx *gin.Context){
-		ctx.JSON(200, gin.H{
-			"message": "Hello Worlds",
-		})
-	})
-
+	r.POST("/posts", controllers.PostsCreate)
+	r.GET("/posts", controllers.PostsFindAll)
+	r.GET("/post/:id", controllers.PostFindOne)
+	r.PUT("/post/:id", controllers.PostUpdate)
+	r.DELETE("/post/:id", controllers.PostDelete)
 	r.Run()
 }
