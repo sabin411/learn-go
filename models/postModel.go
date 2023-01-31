@@ -5,5 +5,5 @@ import "gorm.io/gorm"
 type POST struct {
 	gorm.Model
   	Title string
-	BODY string
+	Body string
 }
