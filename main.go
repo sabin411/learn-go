@@ -22,5 +22,6 @@ func main() {
 	r.DELETE("/post/:id", controllers.PostDelete)
 
 	r.POST("/sign-up", controllers.Signup)
+	r.POST("/login", controllers.Login);
 	r.Run()
 }
