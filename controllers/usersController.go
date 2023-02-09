@@ -3,7 +3,6 @@ package controllers
 import (
 	"go-gin/initializers"
 	"go-gin/models"
-	"net/http"
 	"os"
 	"time"
 
@@ -24,7 +23,6 @@ func Signup(ctx *gin.Context){
 		ctx.JSON(400, gin.H{"message": "Bad request"})
 		return
 	}
-	println(&body, "flkdjslkfjldskj")
 
 	// 2. hash the password. 
 	hash, err := bcrypt.GenerateFromPassword([]byte(body.Password), 10)
@@ -46,14 +44,41 @@ func Signup(ctx *gin.Context){
 }
 
 
-func Login(ctx *gin.Context){
-	// Create the JWT key used to create the signature
-	jwtKey := []byte(os.Getenv("SECRET_KEY"));
 
+func CreateToken(expirationTime time.Time, jwtKey []byte, email string ) (string, error){
 	type Claims struct {
 		Email string `json:"username"`
 		jwt.RegisteredClaims
 	}
+
+// 4. Generate JWT token
+	
+	claims := &Claims{
+		Email: email,
+		RegisteredClaims: jwt.RegisteredClaims{
+			// In JWT, the expiry time is expressed as unix milliseconds
+			ExpiresAt: jwt.NewNumericDate(expirationTime),
+		},
+	}
+
+	// Declare the token with the algorithm used for signing, and the claims
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+	// Create the JWT string
+	tokenString, err := token.SignedString(jwtKey)
+
+	if err != nil {
+		// If there is an error in creating the JWT return an internal server error
+		return "", err
+	}
+
+	return tokenString, nil
+}
+
+
+func Login(ctx *gin.Context){
+	// Create the JWT key used to create the signature
+	accessKey := []byte(os.Getenv("ACCESS_SECRET_KEY"));
+	refreshKey := []byte(os.Getenv("REFRESH_SECRET_KEY"));
 
 	// 1. Get email and password from the body
 	var loginBody struct {
@@ -65,6 +90,7 @@ func Login(ctx *gin.Context){
 		ctx.JSON(400, gin.H{"message": "Bad request"})
 		return
 	}
+	
 	// 2. Find the user by email
 	user := models.User{}
 	initializers.DB.First(&user, "email = ?", loginBody.Email)
@@ -84,30 +110,28 @@ func Login(ctx *gin.Context){
 	// 4. Generate JWT token
 	// Declare the expiration time of the token
 	// here, we have kept it as 5 minutes
-	expirationTime := time.Now().Add(time.Hour * 24 * 30);
-	
-	claims := &Claims{
-		Email: user.Email,
-		RegisteredClaims: jwt.RegisteredClaims{
-			// In JWT, the expiry time is expressed as unix milliseconds
-			ExpiresAt: jwt.NewNumericDate(expirationTime),
-		},
-	}
+	refreshTokenExpirationDuration := time.Now().Add(time.Hour * 24 * 30);
+	accessTokenExpirationDuration := time.Now().Add(time.Hour * 24);
 
-	// Declare the token with the algorithm used for signing, and the claims
-	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-	// Create the JWT string
-	tokenString, err := token.SignedString(jwtKey)
-
-	if err != nil {
-		// If there is an error in creating the JWT return an internal server error
-		ctx.JSON(http.StatusInternalServerError, gin.H{"message": "Error signing token"})
+	refreshToken, refreshErr := CreateToken(refreshTokenExpirationDuration, refreshKey, user.Email)
+	if(refreshErr != nil){
+		ctx.JSON(500, gin.H{"message": "Error creating refresh token"})
 		return
 	}
-		
+	accessToken, accessErr  := CreateToken(accessTokenExpirationDuration, accessKey, user.Email)
+	if(accessErr != nil){
+		ctx.JSON(500, gin.H{"message": "Error creating access token"})
+		return
+	}
+
+
 	// Finally, we set the client cookie for "token" as the JWT we just generated
 	// we also set an expiry time which is the same as the token itself
-	ctx.SetCookie("token", tokenString, int(expirationTime.Unix()), "/", "localhost", false, true)
+	ctx.SetCookie("refresh_token", refreshToken, int(refreshTokenExpirationDuration.Unix()), "/", "localhost", false, true)
+	ctx.SetCookie("access_token", accessToken, int(accessTokenExpirationDuration.Unix()), "/", "localhost", false, true)
 
 	ctx.JSON(200, gin.H{"message": "User logged in successfully"})
 }
+
+
+
