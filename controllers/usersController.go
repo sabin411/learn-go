@@ -90,7 +90,7 @@ func Login(ctx *gin.Context){
 		ctx.JSON(400, gin.H{"message": "Bad request"})
 		return
 	}
-	
+
 	// 2. Find the user by email
 	user := models.User{}
 	initializers.DB.First(&user, "email = ?", loginBody.Email)
@@ -133,5 +133,7 @@ func Login(ctx *gin.Context){
 	ctx.JSON(200, gin.H{"message": "User logged in successfully"})
 }
 
-
-
+func Welcome(ctx *gin.Context) {
+	ctx.JSON(200, gin.H{"message": "Welcome to the home page"})
+	
+}
