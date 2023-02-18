@@ -1,10 +1,10 @@
 package main
 
 import (
-	"go-gin/controllers"
+	"go-gin/bootstrap"
 	"go-gin/initializers"
 
-	"github.com/gin-gonic/gin"
+	"go.uber.org/fx"
 )
 
 func init(){
@@ -13,15 +13,12 @@ func init(){
 }
 
 func main() {
-	r := gin.Default();
+	// r := gin.Default();
 
-	r.POST("/posts", controllers.PostsCreate)
-	r.GET("/posts", controllers.PostsFindAll)
-	r.GET("/post/:id", controllers.PostFindOne)
-	r.PUT("/post/:id", controllers.PostUpdate)
-	r.DELETE("/post/:id", controllers.PostDelete)
+	// r.POST("/sign-up", controllers.Signup)
+	// r.POST("/login", controllers.Login);
+	// r.GET("/home", middleware.AuthMiddleware ,controllers.Welcome);
+	// r.Run()
+	fx.New(bootstrap.Module).Run()
 
-	r.POST("/sign-up", controllers.Signup)
-	r.POST("/login", controllers.Login);
-	r.Run()
 }

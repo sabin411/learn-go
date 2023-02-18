@@ -11,7 +11,5 @@ func init(){
 }
 
 func main() {
-	// Migrate the schema
-  initializers.DB.AutoMigrate(&models.POST{})
   initializers.DB.AutoMigrate(&models.User{})
 }
