@@ -33,6 +33,11 @@ require (
 	github.com/pelletier/go-toml/v2 v2.0.6 // indirect
 	github.com/radovskyb/watcher v1.0.7 // indirect
 	github.com/ugorji/go/codec v1.2.8 // indirect
+	go.uber.org/atomic v1.10.0 // indirect
+	go.uber.org/dig v1.16.0 // indirect
+	go.uber.org/fx v1.19.1 // indirect
+	go.uber.org/multierr v1.6.0 // indirect
+	go.uber.org/zap v1.23.0 // indirect
 	golang.org/x/crypto v0.5.0 // indirect
 	golang.org/x/net v0.5.0 // indirect
 	golang.org/x/sys v0.5.0 // indirect
